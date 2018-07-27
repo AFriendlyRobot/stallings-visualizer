@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Stallings Visualization</title>
+		<meta name="description" content="Visualization for Stallings observations">
+		<meta name="author" content="Thomas Schaffner">
+		<link rel="stylesheet" href="style.css">
+	</head>
+
+	<body>
+		<h1>Visualizer</h1>
+
+		<input type="file" id="infile" name="fileinput" onchange="handleFile()" accept=".csv"/>
+
+		<div id="graphic-container">
+			<svg id="graphic" width="960" height="500"></svg>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script src="script.js"></script>
+	</body>
+
+</html>
