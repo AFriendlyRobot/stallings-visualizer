@@ -376,14 +376,74 @@ function readhandler(event) {
 		teachtots[teachact] += 1;
 	}
 
-	// console.log(actmap);
-	// console.log(teachtots);
 	generateGraphic(actmap, teachtots);
 }
 
 
 function errorhandler(event) {
 	alert("ERROR: " + event.target.error.name);
+}
+
+
+// REF: https://github.com/ajbc/trellis/blob/master/src/shiny/www/topics.js
+
+var relevantStyles = [
+	"display",
+	"visibility",
+	"background-color",
+	"opacity",
+	"stroke",
+	"stroke-width",
+	"fill",
+	"font",
+	"font-weight"
+];
+
+// Ref: https://stackoverflow.com/questions/15181452/how-to-save-export-inline-svg-styled-with-css-from-browser-to-image-file?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+// Recursive function used to explicitly record style for SVG downloads
+function setStyle(elem) {
+	var idstr = $(elem).attr("id");
+
+	if (typeof idstr !== 'undefined') {
+		$(elem).attr("id","clone-"+idstr);
+		
+		var compStyle = window.getComputedStyle(document.getElementById($(elem).attr("id").slice(6)));
+
+		var styleString = "";
+
+		for (var idx = 0; idx < relevantStyles.length; idx++) {
+			var styleKind = relevantStyles[idx];
+			styleString += styleKind + ":" + compStyle.getPropertyValue(styleKind) + "; ";
+		}
+
+		$(elem).attr("style", styleString);
+	}
+
+	$(elem).children().each(function(i) { setStyle($(this)) });
+}
+
+
+// REF: https://github.com/ajbc/trellis/blob/master/src/shiny/www/topics.js
+function saveSVG() {
+	var serializer = new XMLSerializer();
+	var selector = "#graphic"
+
+	var clone = $(selector).clone(true, true, true);
+	setStyle(clone);
+
+	var sourceString = serializer.serializeToString($(clone)[0]);
+
+	// Ref: https://stackoverflow.com/questions/2483919/how-to-save-svg-canvas-to-local-filesystem
+	$("body").append("<a id=\"tmp-download-link\" class=\"hidden\"></a>");
+	$("#tmp-download-link").attr("href", "data:image/svg+xml;utf8," + sourceString)
+			.attr("download", "graph.svg")
+			.attr("target", "_blank");
+	$("#tmp-download-link")[0].click();
+	$("a#tmp-download-link").remove();
+
+	// NOTE(tfs): Not 100% sure this adequately cleans up. If downloading ends up causing
+	//            performance issues, check here first.
+	$(clone).remove();
 }
 
 
