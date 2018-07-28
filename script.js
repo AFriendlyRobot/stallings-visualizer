@@ -58,7 +58,7 @@ function generateGraphic(actmap, teachtots) {
 	}
 
 	var svg = d3.select("svg"),
-		margin = { top: 20, right: 60, bottom: 30, left: 40 },
+		margin = { top: 20, right: 60, bottom: 45, left: 65 },
 		width = +svg.attr("width") - margin.left - margin.right,
 		height = +svg.attr("height") - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -165,7 +165,7 @@ function generateGraphic(actmap, teachtots) {
 	botg.append("path")
 			.attr("class", "domain")
 			.attr("stroke", "#000")
-			.attr("d", "M0.5,6V0.5H860.5V6")
+			.attr("d", "M0.5,6V0.5H" + (width) + "V6")
 		
 	// Generate ticks
 	for (var i = 0; i < ttdom.length; i++) {
@@ -189,6 +189,23 @@ function generateGraphic(actmap, teachtots) {
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.call(d3.axisLeft(y));
 
+
+	// REF: https://bl.ocks.org/d3noob/23e42c8f67210ac6c678db2cd07a747e
+	// X axis label
+	svg.append("text")
+		.attr("transform", "translate(" + (margin.left + (width/2)) + " ," +
+							(height + margin.top + 40) + ")")
+		.style("text-anchor", "middle")
+		.text("Teacher Activity")
+
+	// Y axis label
+	svg.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 10)
+		.attr("x", 0 - (height/2))
+		.attr("dy", "1em")
+		.style("text-anchor", "middle")
+		.text("Student Activity Portions")
 
 	// Tooltip
 	// REF: http://bl.ocks.org/mstanaland/6100713
