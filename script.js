@@ -2,6 +2,25 @@ var X_INNER_SPACING = 2; // px
 var X_OUTER_MARGIN = 5; // px
 
 
+// actmap format:
+/*
+{
+	teacher_activity: {
+		student_activity: count,
+		student_activity: count,
+		. . .
+	},
+	teacher_activity: {
+		student_activity: count,
+		student_activity: count,
+		. . .
+	},
+	. . .
+}
+*/
+
+
+// Extracts list of unique teacher activity labels
 function extractTeacherActivities(actmap) {
 	var acts = [];
 
@@ -13,6 +32,7 @@ function extractTeacherActivities(actmap) {
 }
 
 
+// Extracts list of unique student activity labels
 function extractStudentActivities(actmap) {
 	var acts = [];
 	var actflags = {};
@@ -32,15 +52,36 @@ function extractStudentActivities(actmap) {
 
 
 // REF: https://bl.ocks.org/mbostock/3886394
+// Handles all D3 SVG generation based on actmap and observation totals for each teacher activity
 function generateGraphic(actmap, teachtots) {
 	// Each data node: { teach_act:"String", [stud_act_1]:[count], [stud_act_2]:[count], . . . }
 	//      Leading to one node per teacher activity
 
+	// Extract unique labels
 	var teachacts = extractTeacherActivities(actmap);
 	var studacts = extractStudentActivities(actmap);
 
+	// Data format:
+	/*
+	[
+		{
+			teacherActivity: [teacher activity label],
+			[student_activity_1]: count,
+			[student_activity_2]: count,
+			. . . 
+		},
+		{
+			teacherActivity: [teacher activity label],
+			[student_activity_1]: count,
+			[student_activity_2]: count,
+			. . . 
+		},
+		. . .
+	]
+	*/
 	var data = [];
 
+	// Populate data
 	for (var i = 0; i < teachacts.length; i++) {
 		var newPoint = {};
 
@@ -57,6 +98,8 @@ function generateGraphic(actmap, teachtots) {
 		data.push(newPoint);
 	}
 
+	// Setup initial SVG, g elements
+	// Margin should be adjusted here
 	var svg = d3.select("svg"),
 		margin = { top: 20, right: 60, bottom: 45, left: 65 },
 		width = +svg.attr("width") - margin.left - margin.right,
@@ -64,6 +107,7 @@ function generateGraphic(actmap, teachtots) {
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	// REF: https://stackoverflow.com/questions/25500316/sort-a-dictionary-by-value-in-javascript
+	// Sort teacher totals by size (largest corresponds to leftmost column)
 	var ttitems = Object.keys(teachtots).map(function(key) {
 		return [key, teachtots[key]];
 	});
@@ -77,6 +121,7 @@ function generateGraphic(actmap, teachtots) {
 		totalcount += ttitems[i][1];
 	}
 
+	// Calculate manual x offset and teachertots-scaled column widths
 	var xwidth = width - ((ttitems.length - 1) * X_INNER_SPACING) - (2 * X_OUTER_MARGIN);
 
 	var ttwidths = {}
@@ -91,11 +136,10 @@ function generateGraphic(actmap, teachtots) {
 		offset += ttwidths[ttitems[i][0]] + X_INNER_SPACING;
 	}
 
+	// Provide simpler access to teacher activity domain
 	var ttdom = [];
-	var ttran = [];
 	for (var i = 0; i < ttitems.length; i++) {
 		ttdom.push(ttitems[i][0]);
-		ttran.push(xoffsets[ttitems[i][1]]);
 	}
 
 	var y = d3.scaleLinear()
@@ -104,6 +148,7 @@ function generateGraphic(actmap, teachtots) {
 	var z = d3.scaleOrdinal(d3.schemeCategory10);
 
  	// REF: https://bl.ocks.org/mbostock/b5935342c6d21928111928401e2c8608
+ 	// Use d3 stack as layout for data
  	var series = d3.stack()
  					.keys(studacts)
  					.offset(d3.stackOffsetExpand)(data);
@@ -119,6 +164,7 @@ function generateGraphic(actmap, teachtots) {
  				return z(d.key)
  			});
 
+ 	// Add column rectangles
 	subgs.selectAll("rect")
 		.data(function(d) { return d; })
 		.enter().append("rect")
@@ -135,6 +181,7 @@ function generateGraphic(actmap, teachtots) {
 			.on("mouseover", function() { tooltip.style("display", null) })
 			.on("mouseout", function() { tooltip.style("display", "none") })
 			.on("mousemove", function(d) {
+				// Update hovering tooltip
 				var title = d.key;
 				tooltip.select("text").text(title);
 
@@ -155,6 +202,7 @@ function generateGraphic(actmap, teachtots) {
 					.attr("y", -2)
 			});
 
+	// Manually generate x axis
 	var botg = svg.append("g")
 		.attr("fill", "none")
 		.attr("font-size", "10")
@@ -167,7 +215,7 @@ function generateGraphic(actmap, teachtots) {
 			.attr("stroke", "#000")
 			.attr("d", "M0.5,6V0.5H" + (width) + "V6")
 		
-	// Generate ticks
+	// Generate ticks for x axis
 	for (var i = 0; i < ttdom.length; i++) {
 		var newg = botg.append("g")
 			.attr("class", "tick")
@@ -185,6 +233,7 @@ function generateGraphic(actmap, teachtots) {
 			.text(ttdom[i])
 	}
 
+	// Generate y axis
 	svg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.call(d3.axisLeft(y));
@@ -245,22 +294,6 @@ function handleFile() {
 	}
 }
 
-var exp = {};
-
-
-function handleMouseEnter(d) {
-	var selector = "#text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "");
-	console.log(selector);
-	$(selector).removeClass("hidden-title");
-}
-
-
-function handleMouseLeave(d) {
-	var selector = "#text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "");
-	console.log(selector);
-	$(selector).addClass("hidden-title");
-}
-
 
 function readhandler(event) {
 	var text = event.target.result.replace(/\r\n/, "\n");
@@ -269,8 +302,7 @@ function readhandler(event) {
 	var actmap = {};
 	var teachtots = {};
 
-	exp.txt = text;
-
+	// Parse file into actmap and teachtots
 	// Skip header, start at i=1
 	for (var i = 1; i < lines.length; i++) {
 		// Ugly handling of CR/NL CSV delineation (thanks Windows)
