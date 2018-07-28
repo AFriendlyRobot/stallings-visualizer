@@ -11,6 +11,8 @@ body {
 
 .bar-rect {
 	opacity: 1.0;
+	stroke-width: 1px;
+	stroke: black;
 }
 
 

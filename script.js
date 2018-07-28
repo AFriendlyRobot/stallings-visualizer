@@ -1,5 +1,5 @@
-var X_INNER_SPACING = 2; // px
-var X_OUTER_MARGIN = 5; // px
+var X_INNER_SPACING = 0; // px
+var X_OUTER_MARGIN = 0; // px
 
 
 // actmap format:
@@ -145,7 +145,8 @@ function generateGraphic(actmap, teachtots) {
 	var y = d3.scaleLinear()
 		.rangeRound([height, 0]);
 
-	var z = d3.scaleOrdinal(d3.schemeCategory10);
+	// var z = d3.scaleOrdinal(d3.schemeCategory10);
+	var z = d3.scaleOrdinal(d3.schemePastel1);
 
  	// REF: https://bl.ocks.org/mbostock/b5935342c6d21928111928401e2c8608
  	// Use d3 stack as layout for data
@@ -172,9 +173,9 @@ function generateGraphic(actmap, teachtots) {
 				return ttwidths[d.data.teacherActivity];
 			})
 			.attr("x", function(d) {
-				return xoffsets[d.data.teacherActivity];
+				return xoffsets[d.data.teacherActivity] + 1;
 			})
-			.attr("y", function(d) { return y(d[1]); })
+			.attr("y", function(d) { return y(d[1]) + 0.5; })
 			.attr("height", function(d) { return y(d[0]) - y(d[1]); })
 			.attr("id", function(d) { return "rect_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
 			.attr("class", "bar-rect")
@@ -190,16 +191,18 @@ function generateGraphic(actmap, teachtots) {
 				var th = bb.height;
 
 				tooltip.select("rect")
-					.attr("width", (tw+4) + "px")
-					.attr("height", (th+4) + "px")
+					.attr("width", (tw+8) + "px")
+					.attr("height", (th+8) + "px")
+					.attr("rx", "5")
+					.attr("ry", "5");
 
-				var xPosition = d3.mouse(this)[0] - ((tw+4)/2) + margin.left;
-				var yPosition = d3.mouse(this)[1] - (th+8) + margin.top;
-				tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")")
+				var xPosition = d3.mouse(this)[0] - ((tw+8)/2) + margin.left;
+				var yPosition = d3.mouse(this)[1] - (th+16) + margin.top;
+				tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
 
 				tooltip.select("text")
-					.attr("x", 2)
-					.attr("y", -2)
+					.attr("x", 4)
+					.attr("y", 0);
 			});
 
 	// Manually generate x axis
@@ -266,7 +269,7 @@ function generateGraphic(actmap, teachtots) {
 		.attr("width", 30)
 		.attr("height", 20)
 		.attr("fill", "white")
-		.style("opacity", 0.5);
+		.style("opacity", 0.8);
 
 	tooltip.append("text")
 		.attr("dy", "1.2em")
