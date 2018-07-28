@@ -8,6 +8,10 @@
 // }
 
 
+var X_INNER_SPACING = 10; // px
+var X_OUTER_MARGIN = 10; // px
+
+
 function extractTeacherActivities(actmap) {
 	var acts = [];
 
@@ -42,8 +46,6 @@ function generateGraphic(actmap, teachtots) {
 	// Each data node: { teach_act:"String", [stud_act_1]:[count], [stud_act_2]:[count], . . . }
 	//      Leading to one node per teacher activity
 
-	console.log(actmap);
-
 	var teachacts = extractTeacherActivities(actmap);
 	var studacts = extractStudentActivities(actmap);
 
@@ -70,6 +72,60 @@ function generateGraphic(actmap, teachtots) {
 		width = +svg.attr("width") - margin.left - margin.right,
 		height = +svg.attr("height") - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// REF: https://stackoverflow.com/questions/25500316/sort-a-dictionary-by-value-in-javascript
+	var ttitems = Object.keys(teachtots).map(function(key) {
+		return [key, teachtots[key]];
+	});
+
+	ttitems.sort(function(first, second) {
+		return second[1] - first[1];
+	});
+
+	console.log(ttitems);
+
+	var totalcount = 0;
+	for (var i = 0; i < ttitems.length; i++) {
+		totalcount += ttitems[i][1];
+	}
+
+	var xwidth = width - ((ttitems.length - 1) * X_INNER_SPACING) - (2 * X_OUTER_MARGIN);
+
+	var ttwidths = {}
+	for (var i = 0; i < ttitems.length; i++) {
+		ttwidths[ttitems[i][0]] = Math.floor((ttitems[i][1] / totalcount) * xwidth);
+		// console.log("!!!!!!!!!!!!!!!");
+		// console.log(i);
+		// console.log(ttitems[i]);
+		// console.log(ttitems[i][1]);
+		// console.log(ttitems[i][1] / totalcount);
+		// console.log((ttitems[i][1] / totalcount) * xwidth);
+		// console.log(Math.floor((ttitems[i][1] / totalcount) * xwidth));
+		// console.log("iiiiiiiiiiiiiii");
+	}
+
+	var xoffsets = {}
+	var offset = X_OUTER_MARGIN;
+	for (var i = 0; i < ttitems.length; i++) {
+		xoffsets[ttitems[i][0]] = Math.floor(offset);
+		offset += ttwidths[ttitems[i][0]] + X_INNER_SPACING;
+	}
+
+	var ttdom = [];
+	var ttran = [];
+	for (var i = 0; i < ttitems.length; i++) {
+		ttdom.push(ttitems[i][0]);
+		ttran.push(xoffsets[ttitems[i][1]]);
+	}
+
+	// var x = d3.scaleOrdinal()
+	// 			.domain(ttdom)
+	// 			.range(ttran);
+
+	// console.log("widthts");
+	// console.log(ttwidths);
+	// console.log("offsets");
+	// console.log(xoffsets);
 
 	// TODO(tfs): Adjust x widths based on teacher totals
 	var x = d3.scaleBand()
@@ -115,26 +171,38 @@ function generateGraphic(actmap, teachtots) {
  					.keys(studacts)
  					.offset(d3.stackOffsetExpand)(data);
 
- 	console.log("TESTING");
- 	console.log(series);
- 	console.log("woot");
-
  	g.selectAll("g").data(series)
  		.enter().append("g")
  			.attr("fill", function(d) { return z(d.key) })
 		.selectAll("rect")
 		.data(function(d) { return d; })
 		.enter().append("rect")
-			.attr("width", x.bandwidth()) // TODO(tfs): Scale based on teachtots
-			.attr("x", function(d) { return x(d.data.teacherActivity); })
+			// .attr("width", x.bandwidth()) // TODO(tfs): Scale based on teachtots
+			// .attr("x", function(d) { return x(d.data.teacherActivity); })
+			.attr("width", function(d) {
+				return ttwidths[d.data.teacherActivity];
+			})
+			.attr("x", function(d) {
+				return xoffsets[d.data.teacherActivity];
+			})
 			.attr("y", function(d) { return y(d[1]); })
 			.attr("height", function(d) { return y(d[0]) - y(d[1]); })
 
-	console.log(x.bandwidth());
-
-	svg.append("g")
+	var botg = svg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + (y(0) + margin.top) + ")")
-		.call(d3.axisBottom(x));
+		.call(d3.axisBottom().scale(x));
+	
+	// botg.append("path")
+	// 		.attr("class", "domain")
+	// 		.attr("stroke", "#000")
+	// 		.attr("d", "M 0.5,6
+	// 					V 0.5
+	// 					H 860.5
+	// 					V 6")
+		
+	// for (var i = 0; i < ttdom.length; i++) {
+
+	// }
 
 	svg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
