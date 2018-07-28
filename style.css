@@ -2,3 +2,35 @@ body {
 	text-align: center;
 }
 
+
+.empty {
+	display: none;
+	visibility: hidden;
+}
+
+
+.bar-rect {
+	opacity: 1.0;
+}
+
+
+.bar-rect:hover {
+	opacity: 0.85;
+}
+
+
+.bar-title {
+	display: block;
+	visibility: visible;
+}
+
+.bar-title.empty {
+	display: none;
+	visibility: hidden;
+}
+
+
+.hidden-title {
+	display: none;
+	visibility: hidden;
+}

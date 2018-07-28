@@ -8,8 +8,8 @@
 // }
 
 
-var X_INNER_SPACING = 10; // px
-var X_OUTER_MARGIN = 10; // px
+var X_INNER_SPACING = 2; // px
+var X_OUTER_MARGIN = 5; // px
 
 
 function extractTeacherActivities(actmap) {
@@ -82,7 +82,7 @@ function generateGraphic(actmap, teachtots) {
 		return second[1] - first[1];
 	});
 
-	console.log(ttitems);
+	// console.log(ttitems);
 
 	var totalcount = 0;
 	for (var i = 0; i < ttitems.length; i++) {
@@ -128,11 +128,11 @@ function generateGraphic(actmap, teachtots) {
 	// console.log(xoffsets);
 
 	// TODO(tfs): Adjust x widths based on teacher totals
-	var x = d3.scaleBand()
-		.domain(data.map(function(d) { return d.teacherActivity; }))
-		.rangeRound([0, width])
-		.padding(0.1)
-		.align(0.1);
+	// var x = d3.scaleBand()
+	// 	.domain(data.map(function(d) { return d.teacherActivity; }))
+	// 	.rangeRound([0, width])
+	// 	.padding(0.1)
+	// 	.align(0.1);
 
 	var y = d3.scaleLinear()
 		.rangeRound([height, 0]);
@@ -171,10 +171,18 @@ function generateGraphic(actmap, teachtots) {
  					.keys(studacts)
  					.offset(d3.stackOffsetExpand)(data);
 
- 	g.selectAll("g").data(series)
+ 	var subgs = g.selectAll("g").data(series)
  		.enter().append("g")
- 			.attr("fill", function(d) { return z(d.key) })
-		.selectAll("rect")
+ 			.attr("fill", function(d) {
+ 				// Propagate key to each rectangle, for title
+ 				for (var i = 0; i < ttdom.length; i++) {
+ 					d[i].key = d.key;
+ 				}
+
+ 				return z(d.key)
+ 			});
+
+	subgs.selectAll("rect")
 		.data(function(d) { return d; })
 		.enter().append("rect")
 			// .attr("width", x.bandwidth()) // TODO(tfs): Scale based on teachtots
@@ -187,22 +195,71 @@ function generateGraphic(actmap, teachtots) {
 			})
 			.attr("y", function(d) { return y(d[1]); })
 			.attr("height", function(d) { return y(d[0]) - y(d[1]); })
+			.attr("id", function(d) { return "rect_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
+			.on("mouseover", handleMouseEnter)
+			.on("mouseout", handleMouseLeave)
+			.attr("class", "bar-rect");
+	
+	subgs.selectAll("text")
+		.data(function(d) { return d; })
+		.enter().append("text")
+			.attr("text-anchor", "middle")
+			.attr("x", function(d) { return xoffsets[d.data.teacherActivity] + ttwidths[d.data.teacherActivity]/2 })
+			.attr("y", function(d) { return y(d[1]) + ((y(d[0]) - y(d[1])) / 2) - 6 })
+			.attr("dy", "0.75em")
+			.attr("fill", "#000")
+			.attr("id", function(d) { return "text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
+			.attr("class", function(d) {
+				if ((y(d[0]) - y(d[1])) <= 0) {
+					return "bar-title empty hidden-title";
+				} else {
+					return "bar-title non-empty hidden-title";
+				}
+			})
+			.text(function(d) { return d.key; });
+
+			// .append("text")
+			// 	.attr("text-anchor", "middle")
+			// 	.text(function(d) { console.log(d); })
+			// 	.attr("transform", "translate(" + (xoffsets[d.data.teacherActivity] + (ttwidths[d.data.teacherActivity]/2)) + "," + (y(d[1] + ((y(d[0]) - y(d[1])) / 2))) + ")");
 
 	var botg = svg.append("g")
-		.attr("transform", "translate(" + margin.left + "," + (y(0) + margin.top) + ")")
-		.call(d3.axisBottom().scale(x));
+		.attr("fill", "none")
+		.attr("font-size", "10")
+		.attr("font-family", "sans-serif")
+		.attr("text-anchor", "middle")
+		.attr("transform", "translate(" + margin.left + "," + (y(0) + margin.top) + ")");
+		// .call(d3.axisBottom().scale(x));
 	
-	// botg.append("path")
-	// 		.attr("class", "domain")
-	// 		.attr("stroke", "#000")
-	// 		.attr("d", "M 0.5,6
-	// 					V 0.5
-	// 					H 860.5
-	// 					V 6")
+	botg.append("path")
+			.attr("class", "domain")
+			.attr("stroke", "#000")
+			.attr("d", "M0.5,6V0.5H860.5V6")
 		
-	// for (var i = 0; i < ttdom.length; i++) {
+	// Generate ticks
+	for (var i = 0; i < ttdom.length; i++) {
+		var newg = botg.append("g")
+			.attr("class", "tick")
+			.attr("opacity", "1")
+			.attr("transform", "translate(" + (X_OUTER_MARGIN + xoffsets[ttdom[i]] + (ttwidths[ttdom[i]]/2)) + ",0)");
 
-	// }
+		// console.log("!!!!!!!!!!!!!!!!!");
+		// console.log(X_OUTER_MARGIN);
+		// console.log(ttdom[i]);
+		// console.log(xoffsets[ttdom[i]]);
+		// console.log(ttwidths[ttdom[i]]/2);
+		// console.log("iiiiiiiiiiiiiiiii");
+
+		newg.append("line")
+			.attr("stroke", "#000")
+			.attr("y2", "6");
+
+		newg.append("text")
+			.attr("fill", "#000")
+			.attr("y", "9")
+			.attr("dy", "0.71em")
+			.text(ttdom[i])
+	}
 
 	svg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -225,16 +282,39 @@ function handleFile() {
 	}
 }
 
+var exp = {};
+
+
+function handleMouseEnter(d) {
+	var selector = "#text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "");
+	// d3.select(selector).classed("hidden-title", false);
+	console.log(selector);
+	$(selector).removeClass("hidden-title");
+}
+
+
+function handleMouseLeave(d) {
+	var selector = "#text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "");
+	// d3.select(selector).classed("hidden-title", true);
+	console.log(selector);
+	$(selector).addClass("hidden-title");
+}
+
 
 function readhandler(event) {
-	var text = event.target.result;
+	var text = event.target.result.replace(/\r\n/, "\n");
 	var lines = text.split(/\r|\r\n|\n/);
 
 	var actmap = {};
 	var teachtots = {};
 
+	exp.txt = text;
+
 	// Skip header, start at i=1
 	for (var i = 1; i < lines.length; i++) {
+		// Ugly handling of CR/NL CSV delineation (thanks Windows)
+		if (lines[i].length <= 0) { continue; }
+
 		var cols = lines[i].split(",");
 		
 		teachact = cols[0];
