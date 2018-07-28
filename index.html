@@ -15,7 +15,7 @@
 
 		<input type="file" id="infile" name="fileinput" onchange="handleFile()" accept=".csv"/>
 
-		<button type="button" onclick="saveSVG()">Save SVG</button>
+		<button type="button" onclick="saveSVG()" disabled="disabled" id="svg-download">Save SVG</button>
 
 		<div id="graphic-container">
 			<svg id="graphic" width="960" height="500"></svg>

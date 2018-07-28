@@ -213,6 +213,9 @@ function generateGraphic(actmap, teachtots) {
 // Ref: https://www.html5rocks.com/en/tutorials/file/dndfiles/
 function handleFile() {
 	if (window.FileReader) {
+		$("#graphic").empty();
+		$("#svg-download").prop("disabled", true);
+
 		var f = document.getElementById("infile").files[0];
 
 		var reader = new FileReader();
@@ -278,6 +281,8 @@ function readhandler(event) {
 	}
 
 	generateGraphic(actmap, teachtots);
+
+	$("#svg-download").prop("disabled", false);
 }
 
 
