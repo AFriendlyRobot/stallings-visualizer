@@ -17,9 +17,15 @@
 
 		<button type="button" onclick="saveSVG()" disabled="disabled" id="svg-download">Save SVG</button>
 
+		<button type="button" onclick="saveIMG(960, 500, 'png')" disabled="disabled" id="png-download">Save PNG</button>
+
+		<button type="button" onclick="saveIMG(960, 500, 'jpeg')" disabled="disabled" id="jpg-download">Save JPEG</button>
+
 		<div id="graphic-container">
 			<svg id="graphic" width="960" height="500"></svg>
 		</div>
+
+		<canvas id="export-canvas" width="960" height="500" display="none"></canvas>
 
 		<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 		<script src="https://d3js.org/d3.v5.min.js"></script>

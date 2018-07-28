@@ -322,6 +322,8 @@ function handleFile() {
 	if (window.FileReader) {
 		$("#graphic").empty();
 		$("#svg-download").prop("disabled", true);
+		$("#png-download").prop("disabled", true);
+		$("#jpg-download").prop("disabled", true);
 
 		var f = document.getElementById("infile").files[0];
 
@@ -373,6 +375,8 @@ function readhandler(event) {
 	generateGraphic(actmap, teachtots);
 
 	$("#svg-download").prop("disabled", false);
+	$("#png-download").prop("disabled", false);
+	$("#jpg-download").prop("disabled", false);
 }
 
 
@@ -433,6 +437,49 @@ function saveSVG() {
 	$("body").append("<a id=\"tmp-download-link\" class=\"hidden\"></a>");
 	$("#tmp-download-link").attr("href", "data:image/svg+xml;utf8," + sourceString)
 			.attr("download", "graph.svg")
+			.attr("target", "_blank");
+	$("#tmp-download-link")[0].click();
+	$("a#tmp-download-link").remove();
+
+	// NOTE(tfs): Not 100% sure this adequately cleans up. If downloading ends up causing
+	//            performance issues, check here first.
+	$(clone).remove();
+}
+
+
+// REF: https://stackoverflow.com/questions/14631408/save-svg-html5-to-png-or-image
+// REF: https://gist.github.com/mbostock/6466603
+// REF: http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
+// REF: https://weworkweplay.com/play/saving-html5-canvas-as-image/
+function saveIMG(width, height, fmt) {
+	var cnvs = document.getElementById("export-canvas");
+	var ctx = cnvs.getContext('2d');
+
+	cnvs.width = width;
+	cnvs.height = height;
+
+	var serializer = new XMLSerializer();
+	var selector = "#graphic"
+
+	var clone = $(selector).clone(true, true, true);
+	setStyle(clone);
+
+	var sourceString = serializer.serializeToString($(clone)[0]);
+
+	var img = new Image();
+	// var svg = new Blob([sourceString], {type: 'image/svg+xml'});
+
+	img.onload = function() {
+		ctx.drawImage(img, 0, 0, width, height);
+	}
+
+	var dataURL = cnvs.toDataURL('image/' + fmt);
+
+	console.log(dataURL);
+
+	$("body").append("<a id=\"tmp-download-link\" class=\"hidden\"></a>");
+	$("#tmp-download-link").attr("href", dataURL)
+			.attr("download", "graph." + fmt)
 			.attr("target", "_blank");
 	$("#tmp-download-link")[0].click();
 	$("a#tmp-download-link").remove();
