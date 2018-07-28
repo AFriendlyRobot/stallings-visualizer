@@ -196,27 +196,47 @@ function generateGraphic(actmap, teachtots) {
 			.attr("y", function(d) { return y(d[1]); })
 			.attr("height", function(d) { return y(d[0]) - y(d[1]); })
 			.attr("id", function(d) { return "rect_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
-			.on("mouseover", handleMouseEnter)
-			.on("mouseout", handleMouseLeave)
-			.attr("class", "bar-rect");
+			.attr("class", "bar-rect")
+			.on("mouseover", function() { tooltip.style("display", null) })
+			.on("mouseout", function() { tooltip.style("display", "none") })
+			.on("mousemove", function(d) {
+				var title = d.key;
+				tooltip.select("text").text(title);
+
+				var bb = $(".tooltip text")[0].getBBox();
+				var tw = bb.width;
+				var th = bb.height;
+
+				tooltip.select("rect")
+					.attr("width", (tw+4) + "px")
+					.attr("height", (th+4) + "px")
+
+				var xPosition = d3.mouse(this)[0] - ((tw+4)/2) + margin.left;
+				var yPosition = d3.mouse(this)[1] - (th+8) + margin.top;
+				tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")")
+
+				tooltip.select("text")
+					.attr("x", 2)
+					.attr("y", -2)
+			});
 	
-	subgs.selectAll("text")
-		.data(function(d) { return d; })
-		.enter().append("text")
-			.attr("text-anchor", "middle")
-			.attr("x", function(d) { return xoffsets[d.data.teacherActivity] + ttwidths[d.data.teacherActivity]/2 })
-			.attr("y", function(d) { return y(d[1]) + ((y(d[0]) - y(d[1])) / 2) - 6 })
-			.attr("dy", "0.75em")
-			.attr("fill", "#000")
-			.attr("id", function(d) { return "text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
-			.attr("class", function(d) {
-				if ((y(d[0]) - y(d[1])) <= 0) {
-					return "bar-title empty hidden-title";
-				} else {
-					return "bar-title non-empty hidden-title";
-				}
-			})
-			.text(function(d) { return d.key; });
+	// subgs.selectAll("text")
+	// 	.data(function(d) { return d; })
+	// 	.enter().append("text")
+	// 		.attr("text-anchor", "middle")
+	// 		.attr("x", function(d) { return xoffsets[d.data.teacherActivity] + ttwidths[d.data.teacherActivity]/2 })
+	// 		.attr("y", function(d) { return y(d[1]) + ((y(d[0]) - y(d[1])) / 2) - 6 })
+	// 		.attr("dy", "0.75em")
+	// 		.attr("fill", "#000")
+	// 		.attr("id", function(d) { return "text_" + d.data.teacherActivity.replace(/\ /g, "") + "_" + d.key.replace(/\ /g, "") })
+	// 		.attr("class", function(d) {
+	// 			if ((y(d[0]) - y(d[1])) <= 0) {
+	// 				return "bar-title empty hidden-title";
+	// 			} else {
+	// 				return "bar-title non-empty hidden-title";
+	// 			}
+	// 		})
+	// 		.text(function(d) { return d.key; });
 
 			// .append("text")
 			// 	.attr("text-anchor", "middle")
@@ -264,6 +284,26 @@ function generateGraphic(actmap, teachtots) {
 	svg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.call(d3.axisLeft(y));
+
+
+	// Tooltip
+	// REF: http://bl.ocks.org/mstanaland/6100713
+	var tooltip = svg.append("g")
+		.attr("class", "tooltip")
+		.style("display", "none");
+
+	tooltip.append("rect")
+		.attr("width", 30)
+		.attr("height", 20)
+		.attr("fill", "white")
+		.style("opacity", 0.5);
+
+	tooltip.append("text")
+		// .attr("x", 15)
+		.attr("dy", "1.2em")
+		.style("text-anchor", "front")
+		.attr("font-size", "12px")
+		.attr("font-weight", "bold")
 }
 
 
