@@ -101,7 +101,7 @@ function generateGraphic(actmap, teachtots) {
 	// Setup initial SVG, g elements
 	// Margin should be adjusted here
 	var svg = d3.select("svg"),
-		margin = { top: 20, right: 60, bottom: 45, left: 65 },
+		margin = { top: 20, right: 360, bottom: 45, left: 65 },
 		width = +svg.attr("width") - margin.left - margin.right,
 		height = +svg.attr("height") - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -259,6 +259,43 @@ function generateGraphic(actmap, teachtots) {
 		.style("text-anchor", "middle")
 		.text("Student Activity Portions")
 
+
+	// Legend
+	// REF: https://bl.ocks.org/mtandre/bea54a387eb5506ad5d46cb5e74d9bce
+	var legend = svg.append("g")
+		.attr("class", "legend")
+		.attr("transform", "translate(" + (margin.left + width + 25) + "," + "0)");
+
+	legend.selectAll("rect")
+		.data(studacts)
+		.enter()
+		.append("rect")
+		.attr("x", 0)
+		.attr("y", function(d, i) {
+			return (i * 34) + margin.top + 15; 
+		})
+		.attr("width", 24)
+		.attr("height", 24)
+		.attr("fill", function(d, i) {
+			return z(d);
+		});
+
+	legend.selectAll("text")
+		.data(studacts)
+		.enter()
+		.append("text")
+		.text(function(d) {
+			return d;
+		})
+		.attr("x", 34)
+		.attr("y", function(d, i) {
+			return (i * 34) + margin.top + 21;
+		})
+		.attr("text-anchor", "start")
+		.attr("alignment-baseline", "hanging")
+		.attr("font-family", "sans-serif")
+
+
 	// Tooltip
 	// REF: http://bl.ocks.org/mstanaland/6100713
 	var tooltip = svg.append("g")
@@ -276,6 +313,7 @@ function generateGraphic(actmap, teachtots) {
 		.style("text-anchor", "front")
 		.attr("font-size", "12px")
 		.attr("font-weight", "bold")
+		.attr("class", "tooltip-text");
 }
 
 

@@ -3,6 +3,11 @@ body {
 }
 
 
+h1 {
+	font-family: sans-serif;
+}
+
+
 .empty {
 	display: none;
 	visibility: hidden;
@@ -26,6 +31,7 @@ body {
 	visibility: visible;
 }
 
+
 .bar-title.empty {
 	display: none;
 	visibility: hidden;
@@ -35,4 +41,9 @@ body {
 .hidden-title {
 	display: none;
 	visibility: hidden;
+}
+
+
+.tooltip-text {
+	font-family: sans-serif;
 }
