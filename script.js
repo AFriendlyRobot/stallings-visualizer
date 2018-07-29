@@ -248,16 +248,19 @@ function generateGraphic(actmap, teachtots) {
 		.attr("transform", "translate(" + (margin.left + (width/2)) + " ," +
 							(height + margin.top + 40) + ")")
 		.style("text-anchor", "middle")
-		.text("Teacher Activity")
+		.style("fill", "black")
+		.text("Teacher Activity");
+
 
 	// Y axis label
 	svg.append("text")
 		.attr("transform", "rotate(-90)")
 		.attr("y", 10)
-		.attr("x", 0 - (height/2))
+		.attr("x", 0 - ((height/2) + margin.top))
 		.attr("dy", "1em")
 		.style("text-anchor", "middle")
-		.text("Student Activity Portions")
+		.style("fill", "black")
+		.text("Student Activity");
 
 
 	// Legend
@@ -294,6 +297,7 @@ function generateGraphic(actmap, teachtots) {
 		.attr("text-anchor", "start")
 		.attr("alignment-baseline", "hanging")
 		.attr("font-family", "sans-serif")
+		.attr("style", "fill: black;");
 
 
 	// Tooltip
@@ -451,13 +455,10 @@ function saveSVG() {
 // REF: https://gist.github.com/mbostock/6466603
 // REF: http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
 // REF: https://weworkweplay.com/play/saving-html5-canvas-as-image/
+// REF: http://bl.ocks.org/biovisualize/8187844
+// REF: https://gist.github.com/vicapow/758fce6aa4c5195d24be
 function saveIMG(width, height, fmt) {
-	var cnvs = document.getElementById("export-canvas");
-	var ctx = cnvs.getContext('2d');
-
-	cnvs.width = width;
-	cnvs.height = height;
-
+	// Get XML serialized string, for generating canvas using an img tag
 	var serializer = new XMLSerializer();
 	var selector = "#graphic"
 
@@ -466,27 +467,47 @@ function saveIMG(width, height, fmt) {
 
 	var sourceString = serializer.serializeToString($(clone)[0]);
 
-	var img = new Image();
-	// var svg = new Blob([sourceString], {type: 'image/svg+xml'});
+	var blb = new Blob([sourceString], { type: "image/svg+xml;charset-utf-8" });
 
+	var url = window.URL.createObjectURL(blb);
+
+	// Create image tag, to be used as source for canvas (which can convert to png)
+	var img = d3.select("body").append("img")
+		.attr("width", width)
+		.attr("height", height)
+		.attr("id", "first-stage-img")
+		.node();
+
+	// Perform final conversion and save once image has loaded
 	img.onload = function() {
+		// Generate new canvas
+		var canvas = d3.select("body").append("canvas").attr("id", "export-canvas").node();
+		canvas.width = width;
+		canvas.height = height;
+		var ctx = canvas.getContext("2d");
+
+		// Draw source image to canvas
 		ctx.drawImage(img, 0, 0, width, height);
+
+		// Get URL for canvas in correct format
+		var canvasURL = canvas.toDataURL("image/"+fmt);
+
+		// Generate, click, and remove a download link
+		$("body").append("<a id=\"tmp-download-link\" class=\"hidden\"></a>");
+		$("#tmp-download-link").attr("href", canvasURL)
+				.attr("download", "graph." + fmt)
+				.attr("target", "_blank");
+		$("#tmp-download-link")[0].click();
+		$("a#tmp-download-link").remove();
+
+		// Clean up
+		$(clone).remove();
+		$("#export-canvas").remove();
+		$(img).remove();
 	}
 
-	var dataURL = cnvs.toDataURL('image/' + fmt);
-
-	console.log(dataURL);
-
-	$("body").append("<a id=\"tmp-download-link\" class=\"hidden\"></a>");
-	$("#tmp-download-link").attr("href", dataURL)
-			.attr("download", "graph." + fmt)
-			.attr("target", "_blank");
-	$("#tmp-download-link")[0].click();
-	$("a#tmp-download-link").remove();
-
-	// NOTE(tfs): Not 100% sure this adequately cleans up. If downloading ends up causing
-	//            performance issues, check here first.
-	$(clone).remove();
+	// Start loading image
+	img.src = url;
 }
 
 

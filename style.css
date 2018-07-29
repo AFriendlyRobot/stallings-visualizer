@@ -1,3 +1,8 @@
+svg {
+	fill: white;
+}
+
+
 body {
 	text-align: center;
 }
@@ -46,4 +51,21 @@ h1 {
 
 .tooltip-text {
 	font-family: sans-serif;
+}
+
+
+text {
+	fill: black;
+}
+
+
+#export-canvas {
+	display: none;
+	visibility: hidden;
+}
+
+
+#first-stage-img {
+	display: none;
+	visibility: hidden;
 }
