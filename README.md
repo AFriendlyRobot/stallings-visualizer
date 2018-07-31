@@ -1,4 +1,9 @@
 # stallings-visualizer
+
+Access the tool at <https://afriendlyrobot.github.io/stallings-visualizer>
+
+---
+
 Visualizer for Stallings observations
 
 This is a simple web interface for generating a (modified) stacked bar chart with column width weights.
