@@ -183,7 +183,8 @@ function generateGraphic(actmap, teachtots) {
 			.on("mouseout", function() { tooltip.style("display", "none") })
 			.on("mousemove", function(d) {
 				// Update hovering tooltip
-				var title = d.key;
+				var title = d.key + ": " + d.data[d.key] + " / ";
+				title += teachtots[d.data.teacherActivity];
 				tooltip.select("text").text(title);
 
 				var bb = $(".tooltip text")[0].getBBox();
