@@ -1,5 +1,6 @@
 svg {
 	fill: white;
+	overflow: visible;
 }
 
 
@@ -68,4 +69,9 @@ text {
 #first-stage-img {
 	display: none;
 	visibility: hidden;
+}
+
+
+.rotated-label {
+	transform: rotate(-15deg);
 }

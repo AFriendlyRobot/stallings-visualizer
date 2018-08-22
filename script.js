@@ -53,7 +53,7 @@ function extractStudentActivities(actmap) {
 
 // REF: https://bl.ocks.org/mbostock/3886394
 // Handles all D3 SVG generation based on actmap and observation totals for each teacher activity
-function generateGraphic(actmap, teachtots) {
+function generateGraphic(actmap, teachtots, x_label, y_label) {
 	// Each data node: { teach_act:"String", [stud_act_1]:[count], [stud_act_2]:[count], . . . }
 	//      Leading to one node per teacher activity
 
@@ -101,7 +101,7 @@ function generateGraphic(actmap, teachtots) {
 	// Setup initial SVG, g elements
 	// Margin should be adjusted here
 	var svg = d3.select("svg"),
-		margin = { top: 20, right: 360, bottom: 45, left: 65 },
+		margin = { top: 20, right: 360, bottom: 75, left: 65 },
 		width = +svg.attr("width") - margin.left - margin.right,
 		height = +svg.attr("height") - margin.top - margin.bottom,
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -211,7 +211,7 @@ function generateGraphic(actmap, teachtots) {
 		.attr("fill", "none")
 		.attr("font-size", "10")
 		.attr("font-family", "sans-serif")
-		.attr("text-anchor", "middle")
+		.attr("text-anchor", "end")
 		.attr("transform", "translate(" + margin.left + "," + (y(0) + margin.top) + ")");
 	
 	botg.append("path")
@@ -234,7 +234,8 @@ function generateGraphic(actmap, teachtots) {
 			.attr("fill", "#000")
 			.attr("y", "9")
 			.attr("dy", "0.71em")
-			.text(ttdom[i])
+			.classed("rotated-label", true)
+			.text(ttdom[i]);
 	}
 
 	// Generate y axis
@@ -247,10 +248,10 @@ function generateGraphic(actmap, teachtots) {
 	// X axis label
 	svg.append("text")
 		.attr("transform", "translate(" + (margin.left + (width/2)) + " ," +
-							(height + margin.top + 40) + ")")
+							(height + margin.top + (margin.bottom - 10)) + ")")
 		.style("text-anchor", "middle")
 		.style("fill", "black")
-		.text("Teacher Activity");
+		.text(x_label);
 
 
 	// Y axis label
@@ -261,7 +262,7 @@ function generateGraphic(actmap, teachtots) {
 		.attr("dy", "1em")
 		.style("text-anchor", "middle")
 		.style("fill", "black")
-		.text("Student Activity");
+		.text(y_label);
 
 
 	// Legend
@@ -350,6 +351,10 @@ function readhandler(event) {
 	var actmap = {};
 	var teachtots = {};
 
+	var header = lines[0].split(",");
+	var x_label = header[0];
+	var y_label = header[1];
+
 	// Parse file into actmap and teachtots
 	// Skip header, start at i=1
 	for (var i = 1; i < lines.length; i++) {
@@ -377,7 +382,7 @@ function readhandler(event) {
 		teachtots[teachact] += 1;
 	}
 
-	generateGraphic(actmap, teachtots);
+	generateGraphic(actmap, teachtots, x_label, y_label);
 
 	$("#svg-download").prop("disabled", false);
 	$("#png-download").prop("disabled", false);
