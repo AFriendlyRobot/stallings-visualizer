@@ -234,7 +234,7 @@ function generateGraphic(actmap, teachtots, x_label, y_label) {
 			.attr("fill", "#000")
 			.attr("y", "9")
 			.attr("dy", "0.71em")
-			.classed("rotated-label", true)
+			.attr("transform", "rotate(-15)")
 			.text(ttdom[i]);
 	}
 

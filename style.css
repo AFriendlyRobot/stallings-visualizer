@@ -70,8 +70,3 @@ text {
 	display: none;
 	visibility: hidden;
 }
-
-
-.rotated-label {
-	transform: rotate(-15deg);
-}
