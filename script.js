@@ -107,14 +107,15 @@ function generateGraphic(actmap, teachtots, x_label, y_label) {
 		g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	// REF: https://stackoverflow.com/questions/25500316/sort-a-dictionary-by-value-in-javascript
-	// Sort teacher totals by size (largest corresponds to leftmost column)
 	var ttitems = Object.keys(teachtots).map(function(key) {
 		return [key, teachtots[key]];
 	});
 
-	ttitems.sort(function(first, second) {
-		return second[1] - first[1];
-	});
+	// DISABLED FOR NOW. UNCOMMENT TO SORT TEACHER TOTALS BY SIZE
+	// Sort teacher totals by size (largest corresponds to leftmost column)
+	// ttitems.sort(function(first, second) {
+	// 	return second[1] - first[1];
+	// });
 
 	var totalcount = 0;
 	for (var i = 0; i < ttitems.length; i++) {
