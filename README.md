@@ -15,6 +15,8 @@ This is a simple web interface for generating a (modified) stacked bar chart wit
 The interface accepts a simple csv file. Only the first two columns are used.
 The first column's unique values correspond to column labels, and the second column's unique values correspond to individual stacked components within columns.
 Both rows and columns are sorted by the order of appearance of their labels within the csv file.
+See `sample_data.csv`.
+Note that data files with more columns may be used, and the visualizer will ignore everything after the first two columns.
 
 The interface also allows users to download an SVG or PNG version of the graphic.
 
